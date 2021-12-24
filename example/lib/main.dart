@@ -1,14 +1,11 @@
-import 'dart:isolate';
-import 'dart:ui';
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
+import 'dart:ui';
 
-import 'package:device_info/device_info.dart';
-import 'package:android_path_provider/android_path_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:path_provider/path_provider.dart';
 
 const debug = true;
 
@@ -52,10 +49,6 @@ class _MyHomePageState extends State<MyHomePage> {
   final _documents = [];
 
   final _images = [
-    {
-      'name': 'thumb_270903',
-      'link': 'http://cdn.frei.re/resources/thumb_270903.png'
-    },
     {
       'name': 'Canyonlands National Park',
       'link':
@@ -254,9 +247,8 @@ class _MyHomePageState extends State<MyHomePage> {
       url: task.link!,
       headers: {"auth": "test_for_sql_encoding"},
       savedDir: _localPath,
-      showNotification: true,
-      openFileFromNotification: true,
-      saveInPublicStorage: true,
+      showNotification: false,
+      saveInPublicStorage: false,
     );
   }
 
@@ -362,18 +354,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<String?> _findLocalPath() async {
-    var externalStorageDirPath;
-    if (Platform.isAndroid) {
-      try {
-        externalStorageDirPath = await AndroidPathProvider.downloadsPath;
-      } catch (e) {
-        final directory = await getExternalStorageDirectory();
-        externalStorageDirPath = directory?.path;
-      }
-    } else if (Platform.isIOS) {
-      externalStorageDirPath =
-          (await getApplicationDocumentsDirectory()).absolute.path;
-    }
+    var externalStorageDirPath =
+        (await getApplicationDocumentsDirectory()).absolute.path;
     return externalStorageDirPath;
   }
 }
