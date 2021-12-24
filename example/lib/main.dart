@@ -49,34 +49,12 @@ class MyHomePage extends StatefulWidget with WidgetsBindingObserver {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final _documents = [
-    {
-      'name': 'Learning Android Studio',
-      'link':
-          'http://barbra-coco.dyndns.org/student/learning_android_studio.pdf'
-    },
-    {
-      'name': 'Android Programming Cookbook',
-      'link':
-          'http://enos.itcollege.ee/~jpoial/allalaadimised/reading/Android-Programming-Cookbook.pdf'
-    },
-    {
-      'name': 'iOS Programming Guide',
-      'link':
-          'http://darwinlogic.com/uploads/education/iOS_Programming_Guide.pdf'
-    },
-    {
-      'name': 'Objective-C Programming (Pre-Course Workbook',
-      'link':
-          'https://www.bignerdranch.com/documents/objective-c-prereading-assignment.pdf'
-    },
-  ];
+  final _documents = [];
 
   final _images = [
     {
-      'name': 'Arches National Park',
-      'link':
-          'https://upload.wikimedia.org/wikipedia/commons/6/60/The_Organ_at_Arches_National_Park_Utah_Corrected.jpg'
+      'name': 'thumb_270903',
+      'link': 'http://cdn.frei.re/resources/thumb_270903.png'
     },
     {
       'name': 'Canyonlands National Park',
@@ -95,18 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   ];
 
-  final _videos = [
-    {
-      'name': 'Big Buck Bunny',
-      'link':
-          'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
-    },
-    {
-      'name': 'Elephant Dream',
-      'link':
-          'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'
-    }
-  ];
+  final _videos = [];
 
   List<_TaskInfo>? _tasks;
   late List<_ItemHolder> _items;
@@ -166,14 +133,15 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   static void downloadCallback(
-      String id, DownloadTaskStatus status, int progress) {
+      String id, DownloadTaskStatus status, int progress, String? etag) {
     if (debug) {
       print(
-          'Background Isolate Callback: task ($id) is in status ($status) and process ($progress)');
+        'Background Isolate Callback: task ($id) is in status ($status) and progress ($progress) with etag: [$etag]',
+      );
     }
     final SendPort send =
         IsolateNameServer.lookupPortByName('downloader_send_port')!;
-    send.send([id, status, progress]);
+    send.send([id, status, progress, etag]);
   }
 
   @override
@@ -326,23 +294,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<bool> _checkPermission() async {
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-    if (widget.platform == TargetPlatform.android &&
-        androidInfo.version.sdkInt <= 28) {
-      final status = await Permission.storage.status;
-      if (status != PermissionStatus.granted) {
-        final result = await Permission.storage.request();
-        if (result == PermissionStatus.granted) {
-          return true;
-        }
-      } else {
-        return true;
-      }
-    } else {
-      return true;
-    }
-    return false;
+    return true;
   }
 
   Future<Null> _prepare() async {
