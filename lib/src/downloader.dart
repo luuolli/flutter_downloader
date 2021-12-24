@@ -17,7 +17,7 @@ import 'models.dart';
 /// range of 0 and 100
 ///
 typedef void DownloadCallback(
-    String id, DownloadTaskStatus status, int progress);
+    String id, DownloadTaskStatus status, int progress, String? etag);
 
 ///
 /// A convenient class wraps all api functions of **FlutterDownloader** plugin
