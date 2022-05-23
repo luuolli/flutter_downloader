@@ -3,15 +3,18 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui';
 
+import 'package:android_path_provider/android_path_provider.dart';
+import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 const debug = true;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await FlutterDownloader.initialize(debug: debug);
+  await FlutterDownloader.initialize(debug: debug, ignoreSsl: true);
 
   runApp(new MyApp());
 }
@@ -165,7 +168,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       onItemClick: (task) {
                         _openDownloadedFile(task).then((success) {
                           if (!success) {
-                            Scaffold.of(context).showSnackBar(SnackBar(
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                                 content: Text('Cannot open this file')));
                           }
                         });
@@ -214,7 +217,7 @@ class _MyHomePageState extends State<MyHomePage> {
               SizedBox(
                 height: 32.0,
               ),
-              FlatButton(
+              TextButton(
                   onPressed: () {
                     _retryRequestPermission();
                   },
@@ -252,9 +255,10 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void _cancelDownload(_TaskInfo task) async {
-    await FlutterDownloader.cancel(taskId: task.taskId!);
-  }
+  // Not used in the example.
+  // void _cancelDownload(_TaskInfo task) async {
+  //   await FlutterDownloader.cancel(taskId: task.taskId!);
+  // }
 
   void _pauseDownload(_TaskInfo task) async {
     await FlutterDownloader.pause(taskId: task.taskId!);
@@ -286,7 +290,25 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<bool> _checkPermission() async {
-    return true;
+    if (Platform.isIOS) return true;
+
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    if (widget.platform == TargetPlatform.android &&
+        androidInfo.version.sdkInt <= 28) {
+      final status = await Permission.storage.status;
+      if (status != PermissionStatus.granted) {
+        final result = await Permission.storage.request();
+        if (result == PermissionStatus.granted) {
+          return true;
+        }
+      } else {
+        return true;
+      }
+    } else {
+      return true;
+    }
+    return false;
   }
 
   Future<Null> _prepare() async {

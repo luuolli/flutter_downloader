@@ -741,13 +741,14 @@ static BOOL debug = YES;
 }
 
 - (void)removeMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
+    __typeof__(self) __weak weakSelf = self;
+
     NSString *taskId = call.arguments[KEY_TASK_ID];
     Boolean shouldDeleteContent = [call.arguments[@"should_delete_content"] boolValue];
     NSDictionary* taskDict = [self loadTaskWithId:taskId];
     if (taskDict != nil) {
         NSNumber* status = taskDict[KEY_STATUS];
         if ([status intValue] == STATUS_ENQUEUED || [status intValue] == STATUS_RUNNING) {
-            __typeof__(self) __weak weakSelf = self;
             [[self currentSession] getTasksWithCompletionHandler:^(NSArray<NSURLSessionDataTask *> *data, NSArray<NSURLSessionUploadTask *> *uploads, NSArray<NSURLSessionDownloadTask *> *downloads) {
                 for (NSURLSessionDownloadTask *download in downloads) {
                     NSURLSessionTaskState state = download.state;
@@ -763,7 +764,11 @@ static BOOL debug = YES;
                 };
             }];
         }
-        [self deleteTask:taskId];
+        
+        dispatch_sync([self databaseQueue], ^{
+            [weakSelf deleteTask:taskId];
+        });
+        
         if (shouldDeleteContent) {
             NSURL *destinationURL = [self fileUrlFromDict:taskDict];
 
@@ -876,8 +881,12 @@ static BOOL debug = YES;
 
 - (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(NSURL *)location
 {
+    
+    NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *) downloadTask.response;
+    long httpStatusCode = (long)[httpResponse statusCode];
+    
     if (debug) {
-        NSLog(@"URLSession:downloadTask:didFinishDownloadingToURL:");
+        NSLog(@"%s HTTP status code: %ld", __FUNCTION__, httpStatusCode);
     }
 
     NSString *taskId = [self identifierForTask:downloadTask ofSession:session];
@@ -924,18 +933,19 @@ static BOOL debug = YES;
             [weakSelf updateTask:taskId status:STATUS_FAILED progress:-1];
         });
     }
+    
 }
 
 -(void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error
 {
-    if (debug) {
-        NSLog(@"URLSession:task:didCompleteWithError:");
-    }
+    
     NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *) task.response;
     long httpStatusCode = (long)[httpResponse statusCode];
+    
     if (debug) {
-        NSLog(@"HTTP status code: %ld", httpStatusCode);
+        NSLog(@"%s HTTP status code: %ld", __FUNCTION__, httpStatusCode);
     }
+    
     bool isSuccess = (httpStatusCode >= 200 && httpStatusCode < 300);
     if (error != nil || !isSuccess) {
         if (debug) {
