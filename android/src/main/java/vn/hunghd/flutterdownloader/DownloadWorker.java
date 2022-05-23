@@ -67,8 +67,6 @@ import javax.net.ssl.X509TrustManager;
 import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.dart.DartExecutor;
-import io.flutter.embedding.engine.loader.FlutterLoader;
-import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistry;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.view.FlutterCallbackInformation;
@@ -178,13 +176,13 @@ public class DownloadWorker extends Worker implements MethodChannel.MethodCallHa
             String filename = getInputData().getString(ARG_FILE_NAME);
 
             DownloadTask task = taskDao.loadTask(getId().toString());
-            if (task.status == DownloadStatus.ENQUEUED) {
-                updateNotification(context, filename == null ? url : filename, DownloadStatus.CANCELED, -1, null, true,
-                        "");
+            if (task != null && task.status == DownloadStatus.ENQUEUED) {
+                updateNotification(context, filename == null ? url : filename, DownloadStatus.CANCELED, -1, null, true, "");
                 taskDao.updateTask(getId().toString(), DownloadStatus.CANCELED, lastProgress);
             }
-        } catch (Exception e) {
-            log("ERROR onStopped - " + e.getMessage());
+        }
+        catch (Exception e) {
+            log("On Stoped error:");
         }
     }
 

@@ -2,39 +2,25 @@
 
 - Bump minimum Flutter version to 3.0.
 
-- fix bug resume download on Android
-- upgrade Android dependencies (WorkerManager 2.7.0-rc01)
 - Bump minimum Dart version to 2.17.
 
 - Improve documentation
 
-- support Android 11 (ScopedStorage, PackageVisibility)
 - Make it possible to disable logging using `FlutterDownloader.initialize(debug: false)`
 
 ## 1.7.4
 
-- fix bug on Android: `getContentLength`
-- upgrade Android dependencies (WorkerManager 2.5.0)
 - fix bug SSL on Android
 - merged PRs: [#635](https://github.com/fluttercommunity/flutter_downloader/pull/635), [#637](https://github.com/fluttercommunity/flutter_downloader/pull/637)
 
 ## 1.7.3
 
-- Stable version of nullsafety
 - fix bug [#614](https://github.com/fluttercommunity/flutter_downloader/issues/614)
 
 ## 1.7.2
 
-- Fix bugs
-- Migrate to nullsafety
 - fix bug on Android
 - upgrade Android dependencies (WorkerManager 2.7.1)
-
-## 1.7.1+1 24-12-2021
-
-Updaters: Vinicius e Lucas
-
-- Return etag from response header on complete
 
 ## 1.7.1
 
