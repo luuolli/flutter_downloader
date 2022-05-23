@@ -6,9 +6,10 @@ import 'dart:ui';
 import 'package:android_path_provider/android_path_provider.dart';
 import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import 'package:flutter_downloader/flutter_downloader.dart';
 
 const debug = true;
 
